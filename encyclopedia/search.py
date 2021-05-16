@@ -23,7 +23,9 @@ def search(keyword):
             result.append(l[i])
             i += 1
         else:
-            i += 1    
+            i += 1
+    if result == []:
+        result = "None"    
     a=result
     return a
 

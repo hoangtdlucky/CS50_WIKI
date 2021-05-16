@@ -16,6 +16,10 @@ from scipy import *
 a = markdown2.markdown_path("encyclopedia/CSS.md")
 rs = []
 
+class NewTaskForm(forms.Form):
+    title = forms.CharField(label="Title")
+    content = forms.CharField(label='Content', widget=forms.Textarea)
+
 def index(request):
     search_post = request.GET.get('q')
     if search_post:
@@ -41,30 +45,28 @@ def entryview(request,TITLE):
         
         #"b": util.get_entry(TITLE),
         #"a": markdown2.markdown_path(f"entries/{TITLE}.md")
-        "a": markdown2.markdown(util.get_entry(TITLE)),
-        "b": TITLE
+        "entry_content": markdown2.markdown(util.get_entry(TITLE)),
+        "entry_title": TITLE
 
 
     }) 
 
 
 def searchform(request):
+    print(request.GET)
     key = request.GET.get('q')
+
     rs = search.search(key)
     if rs[0] == "test_ok":
-        return render(request, "encyclopedia/entry_view.html",{
-        
-        "a": markdown2.markdown(util.get_entry(rs[1])),
+        return entryview(request,rs[1])
 
-    }) 
+    elif rs == "None":
+        return render(request, 'encyclopedia/not_found.html')
 
     return render(request, 'encyclopedia/index.html',{
         'entries':rs
     })
 
-class NewTaskForm(forms.Form):
-    title = forms.CharField(label="Title")
-    content = forms.CharField(label='Content', widget=forms.Textarea)
     
 def add(request):
     if request.method == 'POST':
@@ -86,14 +88,15 @@ def add(request):
 
 
 def edit(request,abs):
+    print(request.GET)
     a = util.get_entry(abs)
     c = {
         'title':abs,
         'content': a,
     }
-    b = NewTaskForm(c)
+    c = NewTaskForm(c)
     return render (request, 'encyclopedia/edit.html', {
-        'form':b
+        'form':c
     })
     add()
 
